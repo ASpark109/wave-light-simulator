@@ -1,0 +1,83 @@
+import pygame
+import math
+
+WIN = pygame.display.set_mode((2340, 780))
+COLOR = (5, 5, 5)
+
+WIDTH = 2340
+HEIGHT = 780
+
+def draw_window(h):
+    WIN.fill((255, 255, 255))
+
+    for i in range(len(h)):
+        pygame.draw.rect(WIN, (0,0,0), ((i*2) + 150, (HEIGHT/2) - h[i], 2, 2))
+    pygame.display.update()
+
+
+def main():
+
+    body_num = 1000
+
+    mass = []
+    accs = []
+    height = []
+    vell = []
+
+    for i in range(body_num):
+        if(i < 200):
+            mass.append(50)
+        else:
+            mass.append(10)
+        accs.append(0)
+        height.append(0)
+        vell.append(0)
+
+    run = True
+    start = False
+    deg = 0
+    clock = pygame.time.Clock()
+
+    control = 0
+    while run:
+        clock.tick(100)
+        for event in pygame.event.get():
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_q:
+                    run = False
+                else:
+                    deg = 0
+                    if event.key == pygame.K_a:
+                        control = 0
+                        start = not start
+                    elif event.key == pygame.K_s:
+                        control = int(body_num/2)
+                        start = not start
+                    elif event.key == pygame.K_d:
+                        control = body_num - 1
+                        start = not start
+
+        if start:
+            height[control] = s(deg)
+            deg += 0.5
+
+        for i in range(body_num - 1):
+            diff = height[i] - height[i+1]
+            force = diff
+            accs[i] += -force / mass[i]
+            accs[i+1] += force / mass[i+1]
+
+        for i in range(body_num):
+            vell[i] += accs[i] * 0.1
+            height[i] += vell[i]
+
+        for i in range(body_num):
+            accs[i] = 0
+
+        draw_window(height)
+
+def s(d):
+    return math.sin(math.radians(d)) * 70
+
+if __name__ == "__main__":
+    main()
