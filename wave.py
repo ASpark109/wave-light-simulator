@@ -27,7 +27,7 @@ def main():
     amplitude = 70
     wave_freq = 2
     t = 0.1
-
+#
     for i in range(body_num):
         mass.append(1)
         height.append(0)
