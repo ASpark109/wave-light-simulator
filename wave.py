@@ -20,22 +20,18 @@ def main():
     body_num = 1000
 
     mass = []
-    force = []
     height = []
     vell = []
 
     stiff_coeff = 1
     amplitude = 70
-    wave_freq = 1
-    t = 1
+    wave_freq = 2
+    t = 0.1
 
     for i in range(body_num):
-        mass.append(10)
-        force.append(0)
+        mass.append(1)
         height.append(0)
         vell.append(0)
-
-    mass[600] = 100
 
     run = True
     start = False
@@ -65,16 +61,14 @@ def main():
             height[control] = s(deg, amplitude)
             deg += wave_freq
 
+        for i in range(body_num):
+            height[i] += vell[i]
+
         for i in range(body_num - 1):
             diff = height[i] - height[i+1]
             f = diff * stiff_coeff
-            force[i] = -f
-            force[i+1] = f
-            vell[i] += (force[i] / mass[i]) * t
-            vell[i+1] += (force[i+1] / mass[i]) * t
-
-        for i in range(body_num):
-            height[i] += vell[i]
+            vell[i] += (-f / mass[i]) * t
+            vell[i+1] += (f / mass[i+1]) * t
 
         draw_window(height)
 
