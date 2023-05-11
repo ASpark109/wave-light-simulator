@@ -20,16 +20,16 @@ def main():
     body_num = 1000
 
     mass = []
-    accs = []
     height = []
     vell = []
 
+    stiff_coeff = 1
+    amplitude = 70
+    wave_freq = 2
+    t = 0.1
+#
     for i in range(body_num):
-        if(i < 200):
-            mass.append(50)
-        else:
-            mass.append(10)
-        accs.append(0)
+        mass.append(1)
         height.append(0)
         vell.append(0)
 
@@ -58,26 +58,22 @@ def main():
                         start = not start
 
         if start:
-            height[control] = s(deg)
-            deg += 0.5
+            height[control] = s(deg, amplitude)
+            deg += wave_freq
+
+        for i in range(body_num):
+            height[i] += vell[i]
 
         for i in range(body_num - 1):
             diff = height[i] - height[i+1]
-            force = diff
-            accs[i] += -force / mass[i]
-            accs[i+1] += force / mass[i+1]
-
-        for i in range(body_num):
-            vell[i] += accs[i] * 0.1
-            height[i] += vell[i]
-
-        for i in range(body_num):
-            accs[i] = 0
+            f = diff * stiff_coeff
+            vell[i] += (-f / mass[i]) * t
+            vell[i+1] += (f / mass[i+1]) * t
 
         draw_window(height)
 
-def s(d):
-    return math.sin(math.radians(d)) * 70
+def s(d, h):
+    return math.sin(math.radians(d)) * h
 
 if __name__ == "__main__":
     main()
