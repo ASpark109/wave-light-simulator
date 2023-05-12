@@ -1,23 +1,31 @@
 import pygame
 import math
 
-WIN = pygame.display.set_mode((2340, 780))
+
+
+WIDTH = 500
+HEIGHT = 500
+
+WIN = pygame.display.set_mode((WIDTH, HEIGHT))
 COLOR = (5, 5, 5)
 
-WIDTH = 2340
-HEIGHT = 780
+maxH = 100
 
-def draw_window(h):
+def draw_window(height, h, w):
     WIN.fill((255, 255, 255))
 
-    for i in range(len(h)):
-        pygame.draw.rect(WIN, (0,0,0), ((i*2) + 150, (HEIGHT/2) - h[i], 2, 2))
+    for i in range(h):
+        for a in range(w):
+            c = (255/100) * (abs(height[i][a]) * 100 / maxH)
+            WIN.set_at((i, a), (c,c,c))
+
     pygame.display.update()
 
 
 def main():
 
-    body_num = 1000
+    h = HEIGHT
+    w = WIDTH
 
     mass = []
     height = []
@@ -25,13 +33,17 @@ def main():
 
     stiff_coeff = 50
     amplitude = 100
-    wave_freq = 4
-    t = 0.001
+    wave_freq = 5
+    t = 0.01
 
-    for i in range(body_num):
-        mass.append(1)
-        height.append(0)
-        vell.append(0)
+    for n in range(h):
+        mass.append([])
+        height.append([])
+        vell.append([])
+        for i in range(w):
+            mass[n].append(1)
+            height[n].append(0)
+            vell[n].append(0)
 
     run = True
     start = False
@@ -51,26 +63,35 @@ def main():
                         control = 0
                         start = not start
                     elif event.key == pygame.K_s:
-                        control = int(body_num/2)
+                        control = int(w/2)
                         start = not start
                     elif event.key == pygame.K_d:
-                        control = body_num - 1
+                        control = w - 1
                         start = not start
 
         if start:
-            height[control] = s(deg, amplitude)
+            height[int(h/2)][control] = s(deg, amplitude)
             deg += wave_freq
 
-        for i in range(body_num):
-            height[i] += vell[i]
+        for i in range(h):
+            for a in range(w):
+                height[i][a] += vell[i][a]
 
-        for i in range(body_num - 1):
-            diff = height[i] - height[i+1]
-            f = diff * stiff_coeff
-            vell[i] += (-f / mass[i]) * t
-            vell[i+1] += (f / mass[i+1]) * t
+        for a in range(h):
+            for i in range(w - 1):
+                diff = height[a][i] - height[a][i+1]
+                f = diff * stiff_coeff
+                vell[a][i] += (-f / mass[a][i]) * t
+                vell[a][i+1] += (f / mass[a][i+1]) * t
 
-        draw_window(height)
+        for a in range(w):
+            for i in range(h - 1):
+                diff = height[i][a] - height[i+1][a]
+                f = diff * stiff_coeff
+                vell[i][a] += (-f / mass[i][a]) * t
+                vell[i+1][a] += (f / mass[i+1][a]) * t
+
+        draw_window(height, h, w)
 
 def s(d, h):
     return math.sin(math.radians(d)) * h
