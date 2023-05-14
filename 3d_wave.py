@@ -1,25 +1,15 @@
 import pygame
 import math
+import numpy as np
 
 
-
-WIDTH = 500
-HEIGHT = 500
+WIDTH = 150
+HEIGHT = 150
 
 WIN = pygame.display.set_mode((WIDTH, HEIGHT))
 COLOR = (5, 5, 5)
 
-maxH = 100
-
-def draw_window(height, h, w):
-    WIN.fill((255, 255, 255))
-
-    for i in range(h):
-        for a in range(w):
-            c = (255/100) * (abs(height[i][a]) * 100 / maxH)
-            WIN.set_at((i, a), (c,c,c))
-
-    pygame.display.update()
+maxH = 10
 
 
 def main():
@@ -31,28 +21,29 @@ def main():
     height = []
     vell = []
 
-    stiff_coeff = 50
-    amplitude = 100
-    wave_freq = 5
-    t = 0.01
+    stiff_coeff = 0.5
+    amplitude = 250
+    wave_freq = 0.5
+    t = 0.1
 
-    for n in range(h):
-        mass.append([])
-        height.append([])
-        vell.append([])
-        for i in range(w):
-            mass[n].append(1)
-            height[n].append(0)
-            vell[n].append(0)
+    mass = np.ones((HEIGHT, WIDTH))
+    height = np.zeros((HEIGHT, WIDTH))
+    vell = np.zeros((HEIGHT, WIDTH))
 
     run = True
     start = False
     deg = 0
-    clock = pygame.time.Clock()
+    WIN.fill((0, 0, 0))
+    for i in range(h):
+        for a in range(w):
+            if math.sqrt((int(w/2) - a) ** 2 + (int(h/2) - i) ** 2) < 30:
+                mass[i][a] = 3
+                WIN.set_at((i, a), (24, 32, 77))
 
-    control = 0
+    
+    frame = 0
+
     while run:
-        clock.tick(100)
         for event in pygame.event.get():
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_q:
@@ -60,38 +51,33 @@ def main():
                 else:
                     deg = 0
                     if event.key == pygame.K_a:
-                        control = 0
-                        start = not start
-                    elif event.key == pygame.K_s:
-                        control = int(w/2)
-                        start = not start
-                    elif event.key == pygame.K_d:
-                        control = w - 1
                         start = not start
 
         if start:
-            height[int(h/2)][control] = s(deg, amplitude)
+            height[int(h/2)][1] = s(deg, amplitude)
             deg += wave_freq
+            # print(vell[int(h/2)][1])
 
-        for i in range(h):
-            for a in range(w):
+        for i in range(1, h - 1):
+            for a in range(1, w - 1):
                 height[i][a] += vell[i][a]
+                c = height[i][a]
+                if c > 255:
+                    c = 255
+                if c < 0:
+                    c = 0
+                WIN.set_at((a, i), (c,c,c))
 
-        for a in range(h):
-            for i in range(w - 1):
-                diff = height[a][i] - height[a][i+1]
-                f = diff * stiff_coeff
-                vell[a][i] += (-f / mass[a][i]) * t
-                vell[a][i+1] += (f / mass[a][i+1]) * t
+        for a in range(1, h-1):
+            for i in range(1, w - 1):
+                diff = -height[a][i] * 4 + (height[a][i - 1] + height[a][i + 1] + height[a + 1][i] + height[a - 1][i])
+                # diff = (height[a][i - 1] + height[a][i + 1] + height[a + 1][i] + height[a - 1][i])/4 - height[a][i]
+                # f = diff * stiff_coeff
+                vell[a][i] += (diff / mass[a][i]) * t
 
-        for a in range(w):
-            for i in range(h - 1):
-                diff = height[i][a] - height[i+1][a]
-                f = diff * stiff_coeff
-                vell[i][a] += (-f / mass[i][a]) * t
-                vell[i+1][a] += (f / mass[i+1][a]) * t
+        pygame.display.update()
 
-        draw_window(height, h, w)
+        frame+=1
 
 def s(d, h):
     return math.sin(math.radians(d)) * h
